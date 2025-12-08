@@ -1,0 +1,18 @@
+[phases.setup]
+nixPkgs = ["nodejs_22"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = [
+  "npx prisma generate",
+  "npm run build",
+  "echo '=== Checking dist folder ==='",
+  "ls -la",
+  "ls -la dist || echo 'No dist folder!'",
+  "find . -name 'main.js' -o -name 'main.ts'"
+]
+
+[start]
+cmd = "npx prisma db push --accept-data-loss && node dist/main"
