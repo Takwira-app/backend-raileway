@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model match_teams {
+  match_team_id Int            @id @default(autoincrement())
+  match_id      Int
+  team_number   Int
+  team_name     String?        @db.VarChar(100)
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  matches       matches        @relation(fields: [match_id], references: [match_id], onDelete: Cascade, onUpdate: NoAction)
+  team_players  team_players[]
+
+  @@unique([match_id, team_number], map: "unique_team_per_match")
+  @@index([match_id], map: "idx_match_teams_match")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model matches {
+  match_id         Int           @id @default(autoincrement())
+  creator_id       Int
+  stadium_id       Int
+  match_date       DateTime      @db.Date
+  start_time       DateTime      @db.Time(6)
+  duration_minutes Int?          @default(90)
+  max_players      Int
+  status           match_status? @default(pending)
+  created_at       DateTime?     @default(now()) @db.Timestamp(6)
+  match_teams      match_teams[]
+  users            users         @relation(fields: [creator_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+  stadiums         stadiums      @relation(fields: [stadium_id], references: [stadium_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([creator_id], map: "idx_matches_creator")
+  @@index([match_date], map: "idx_matches_date")
+  @@index([stadium_id], map: "idx_matches_stadium")
+  @@index([status], map: "idx_matches_status")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model stadiums {
+  stadium_id      Int             @id @default(autoincrement())
+  owner_id        Int
+  name            String          @db.VarChar(200)
+  location        String          @db.VarChar(500)
+  price_per_match Decimal         @db.Decimal(10, 2)
+  capacity        Int
+  status          stadium_status? @default(open)
+  created_at      DateTime?       @default(now()) @db.Timestamp(6)
+  matches         matches[]
+  users           users           @relation(fields: [owner_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([owner_id], map: "idx_stadiums_owner")
+  @@index([status], map: "idx_stadiums_status")
+}
+
+model team_players {
+  match_team_id Int
+  player_id     Int
+  joined_at     DateTime?   @default(now()) @db.Timestamp(6)
+  match_teams   match_teams @relation(fields: [match_team_id], references: [match_team_id], onDelete: Cascade, onUpdate: NoAction)
+  users         users       @relation(fields: [player_id], references: [user_id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([match_team_id, player_id], map: "unique_player_per_match")
+  @@index([player_id], map: "idx_team_players_player")
+  @@index([match_team_id], map: "idx_team_players_team")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  user_id       Int            @id @default(autoincrement())
+  name          String         @db.VarChar(100)
+  email         String         @unique @db.VarChar(255)
+  password_hash String         @db.VarChar(255)
+  role          user_role
+  created_at    DateTime?      @default(now()) @db.Timestamp(6)
+  matches       matches[]
+  stadiums      stadiums[]
+  team_players  team_players[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([role], map: "idx_users_role")
+}
+
+enum match_status {
+  pending
+  approved
+  rejected
+  full
+  cancelled
+}
+
+enum stadium_status {
+  open
+  closed
+  reserved
+}
+
+enum user_role {
+  player
+  owner
+}
