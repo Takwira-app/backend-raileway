@@ -8,10 +8,10 @@ cmds = ["npm ci"]
 cmds = [
   "npx prisma generate",
   "npm run build",
-  "echo '=== Checking dist folder ==='",
-  "ls -la",
-  "ls -la dist || echo 'No dist folder!'",
-  "find . -name 'main.js' -o -name 'main.ts'"
+  "echo '=== Build completed ==='",
+  "ls -la dist",
+  "echo '=== Contents of dist folder ==='",
+  "ls -la dist/ || echo 'No dist folder created!'"
 ]
 
 [start]
