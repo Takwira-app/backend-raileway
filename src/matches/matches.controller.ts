@@ -56,6 +56,36 @@ export class MatchesController {
     return this.matchesService.getChatParticipants(id);
   }
 
+  @Get('pending_requests')
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles('owner')
+  getPendingRequests(@Req() req) {
+    return this.matchesService.getPendingRequests(req.user.id);
+  }
+
+  @Get('owner/matches')
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles('owner')
+  getOwnerMatches(@Req() req) {
+    return this.matchesService.getMatchesForOwner(req.user.id);
+  }
+
+
+  @Post(':id/approve')
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles('owner')
+  approveRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchTeamDto, @Req() req) {
+    return this.matchesService.approveRequest(id, dto, req.user.id);
+  }
+
+  @Post(':id/reject')
+  @UseGuards(JwtAuthGuard,RolesGuard)
+  @Roles('owner')
+  rejectRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchTeamDto, @Req() req) {
+    return this.service.rejectRequest(id, dto, req.user.id);
+  }
+
+
   @Post()
   @UseGuards(RolesGuard)
   @Roles('player')

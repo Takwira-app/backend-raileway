@@ -257,4 +257,76 @@ export class MatchesService {
       },
     });
   }
+
+  async getPendingRequests(userId: number) {
+    return this.prisma.match_teams.findMany({
+      where: {
+        matches: { creator_id: userId, status: match_status.pending },
+      },
+      include: {
+        matches: true,
+        team_players: { include: { users: true } },
+      },
+    });
+  }
+
+  async getMatchesForOwner(ownerId: number) {
+  return this.prisma.matches.findMany({
+    where: {
+      stadiums: {
+        owner_id: ownerId,
+      },
+    },
+    include: {
+      users: true,     
+      stadiums: true,  
+    },
+    orderBy: {
+      match_date: 'asc',
+    },
+  });
+}
+
+
+  async approveRequest(matchId: number, dto: UpdateMatchDto, userId: number) {
+
+    const match = await this.prisma.matches.update({
+      where: { match_id: matchId },
+      data: { status: 'approved' },
+      include: {
+        users: true, 
+        stadiums: true
+      }
+    });
+
+    /*await this.notificationService.createNotification(
+      match.creator_id,
+      'Match Approved! ',
+      `Your match at ${match.stadiums.name} on ${match.match_date} has been approved!`,
+    );
+
+    return match;*/
+
+  }
+
+  async rejectRequest(match_id: number, dto: UpdateMatchDto, userId: number) {
+    const match = await this.prisma.matches.update({
+      where: { match_id: match_id },
+      data: { status: 'rejected' },
+      include: {
+        users: true, 
+        stadiums: true
+      }
+    });
+
+    // Notifier le créateur
+    /*await this.notificationService.createNotification(
+      match.creator_id,
+      'Match Rejected! ',
+      `Your match at ${match.stadiums.name} on ${match.match_date} has been rejected!`,
+    );*/
+
+    return match;
+   
+  }
 }
