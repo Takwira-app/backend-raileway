@@ -56,4 +56,9 @@ export class AuthService {
 
     return { access_token: token  };
   }
+
+  logout() {
+    localStorage.removeItem('access_token');
+    return { message: 'Logout successful' };
+  }
 }
