@@ -1,7 +1,10 @@
-import { Controller, Post, Body } from '@nestjs/common';
+// src/auth/auth.controller.ts
+import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { LoginUserDto } from './dto/login.dto';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,8 +20,26 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
+  @Post('google')
+  googleAuth(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleAuth(dto);
+  }
+
   @Post('logout')
+  @UseGuards(JwtAuthGuard)
   logout() {
     return this.authService.logout();
+  }
+
+  @Post('fcm-token')
+  @UseGuards(JwtAuthGuard)
+  updateFcmToken(@Req() req, @Body('fcmToken') fcmToken: string) {
+    return this.authService.updateFcmToken(req.user.id, fcmToken);
+  }
+
+  @Post('firebase/custom-token')
+  @UseGuards(JwtAuthGuard)
+  async getFirebaseCustomToken(@Req() req) {
+    return this.authService.getFirebaseCustomToken(req.user.id);
   }
 }

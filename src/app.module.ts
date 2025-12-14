@@ -5,10 +5,17 @@ import { MatchesModule } from './matches/matches.module';
 import { MatchTeamsModule } from './match_teams/match_teams.module';
 import { StadiumsModule } from './stadiums/stadiums.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from './auth/auth.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), UsersModule, MatchesModule, MatchTeamsModule, StadiumsModule],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule,
+    AuthModule,
+    MatchesModule,
+    MatchTeamsModule,
+    StadiumsModule,],
   controllers: [],
   providers: [PrismaService],
 })
 export class AppModule {}
+

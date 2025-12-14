@@ -1,13 +1,13 @@
+// src/stadiums/stadiums.module.ts
 import { Module } from '@nestjs/common';
 import { StadiumsService } from './stadiums.service';
 import { StadiumsController } from './stadiums.controller';
-import { AuthService } from 'src/auth/auth.service';
-import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
+  imports: [PrismaModule], // Import PrismaModule instead of PrismaService
   controllers: [StadiumsController],
-  providers: [StadiumsService, PrismaService, AuthService,JwtService],
-  exports: [StadiumsService]
+  providers: [StadiumsService],
+  exports: [StadiumsService],
 })
 export class StadiumsModule {}

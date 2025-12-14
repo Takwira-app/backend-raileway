@@ -1,14 +1,16 @@
-import { Module } from '@nestjs/common';
+// ============================================
+// src/match_teams/match_teams.module.ts
+// ============================================
+import { Module, forwardRef } from '@nestjs/common';
 import { MatchTeamsService } from './match_teams.service';
 import { MatchTeamsController } from './match_teams.controller';
-import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthModule } from 'src/auth/auth.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
+import { MatchesModule } from 'src/matches/matches.module';
 
 @Module({
-  imports: [AuthModule],
+  imports: [PrismaModule, forwardRef(() => MatchesModule)],
   controllers: [MatchTeamsController],
-  providers: [MatchTeamsService,PrismaService],
-  exports: [MatchTeamsService]
-
+  providers: [MatchTeamsService],
+  exports: [MatchTeamsService],
 })
 export class MatchTeamsModule {}

@@ -47,14 +47,7 @@ export class UsersController {
         return this.usersService.update(id, dto);
     }
 
-    @Patch(':id/password')
-    @UseGuards(JwtAuthGuard)
-    updatePassword(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdatePasswordDto, @Req() req:any) {
-        if (+req.user.id !== id)
-            return { error: 'You can only update your own password' };
-        return this.usersService.updatePassword(id, dto);
-    }
-
+    
     @Delete(':id')
     @UseGuards(JwtAuthGuard)
     remove(@Param('id', ParseIntPipe) id: number) {

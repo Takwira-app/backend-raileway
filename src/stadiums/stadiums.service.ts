@@ -8,7 +8,27 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class StadiumsService {
   constructor(private prisma: PrismaService) {}
+  
+  async updatePhotos(stadiumId: number, photos: string[], ownerId: number) {
+  // Verify ownership
+  const stadium = await this.prisma.stadiums.findUnique({
+    where: { stadium_id: stadiumId },
+  });
 
+  if (!stadium) {
+    throw new NotFoundException('Stadium not found');
+  }
+
+  if (stadium.owner_id !== ownerId) {
+    throw new ForbiddenException('You do not own this stadium');
+  }
+
+  // Update photos
+  return this.prisma.stadiums.update({
+    where: { stadium_id: stadiumId },
+    data: { photos },
+  });
+}
 
   async create(dto: CreateStadiumDto,ownerId:number) {
     return this.prisma.stadiums.create({

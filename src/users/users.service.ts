@@ -103,32 +103,6 @@ export class UsersService {
         });
     }
 
-    async updatePassword(user_id: number, dto: UpdatePasswordDto) {
-        const user = await this.prisma.users.findUnique({
-        where: { user_id },
-        });
-
-        if (!user) {
-        throw new NotFoundException(`User with ID ${user_id} not found`);
-        }
-
-        // Vérifier l'ancien mot de passe
-        const valid = await bcrypt.compare(dto.currentPassword, user.password_hash);
-
-        if (!valid) {
-        throw new ForbiddenException('Current password is incorrect');
-        }
-
-        // Hasher le nouveau mot de passe
-        const newHash = await bcrypt.hash(dto.newPassword, 10);
-        await this.prisma.users.update({
-        where: { user_id },
-        data: { password_hash: newHash },
-        });
-
-        return { message: 'Password updated successfully' };
-    }
-
     delete(user_id: number) {
         return this.prisma.users.delete({
             where: { user_id },
