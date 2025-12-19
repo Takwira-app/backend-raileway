@@ -11,7 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
-import * as admin from 'firebase-admin';
+import { admin } from '../firebase/firebase.module'; // Use this import
 
 @Injectable()
 export class AuthService {

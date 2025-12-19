@@ -20,6 +20,7 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UpdateMatchTeamDto } from 'src/match_teams/dto/update-match_team.dto';
 
 @Controller('matches')
 @UseGuards(JwtAuthGuard)
@@ -74,15 +75,15 @@ export class MatchesController {
   @Post(':id/approve')
   @UseGuards(JwtAuthGuard,RolesGuard)
   @Roles('owner')
-  approveRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchTeamDto, @Req() req) {
+  approveRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchDto, @Req() req) {
     return this.matchesService.approveRequest(id, dto, req.user.id);
   }
 
   @Post(':id/reject')
   @UseGuards(JwtAuthGuard,RolesGuard)
   @Roles('owner')
-  rejectRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchTeamDto, @Req() req) {
-    return this.service.rejectRequest(id, dto, req.user.id);
+  rejectRequest(@Param('id',ParseIntPipe) id: number, @Body() dto: UpdateMatchDto, @Req() req) {
+    return this.matchesService.rejectRequest(id, dto, req.user.id);
   }
 
 

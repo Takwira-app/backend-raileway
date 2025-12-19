@@ -7,10 +7,13 @@ import { StadiumsModule } from './stadiums/stadiums.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { FirebaseModule } from './firebase/firebase.module'; // ADD THIS
+
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule,
     AuthModule,
+    FirebaseModule, 
     MatchesModule,
     MatchTeamsModule,
     StadiumsModule,

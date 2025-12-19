@@ -261,7 +261,7 @@ export class MatchesService {
   async getPendingRequests(userId: number) {
     return this.prisma.match_teams.findMany({
       where: {
-        matches: { creator_id: userId, status: match_status.pending },
+        matches: { creator_id: userId, status: 'pending' },
       },
       include: {
         matches: true,
