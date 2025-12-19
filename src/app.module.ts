@@ -13,7 +13,8 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     MatchesModule,
     MatchTeamsModule,
-    StadiumsModule,],
+    StadiumsModule,
+    UsersModule],
   controllers: [],
   providers: [PrismaService],
 })
