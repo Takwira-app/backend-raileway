@@ -14,49 +14,64 @@ export class MatchesService {
    * Create a match and initialize Firebase chat
    */
   async createMatch(dto: CreateMatchDto, userId: number) {
-    // Parse date and time
-    const matchDate = new Date(dto.match_date);
-    const [hours, minutes] = dto.start_time.split(':');
-    matchDate.setHours(Number(hours));
-    matchDate.setMinutes(Number(minutes));
+  // Build datetime
+  const matchDate = new Date(dto.match_date);
+  const [hours, minutes] = dto.start_time.split(':');
+  matchDate.setHours(Number(hours), Number(minutes), 0, 0);
 
-    // Create match in PostgreSQL
-    const match = await this.prisma.matches.create({
-      data: {
-        creator_id: userId,
-        stadium_id: dto.stadium_id,
-        match_date: matchDate,
-        start_time: matchDate,
-        duration_minutes: dto.duration_minutes || 90,
-        max_players: dto.max_players,
-        status: 'pending',
-      },
-    });
+  // 1️⃣ CHECK availability first
+  const conflict = await this.prisma.matches.findFirst({
+    where: {
+      stadium_id: dto.stadium_id,
+      match_date: matchDate,
+      start_time: matchDate,
+      status: { not: 'cancelled' },
+    },
+  });
 
-    try {
-      // Initialize Firebase Realtime Database chat room
-      const chatRef = admin.database().ref(`chats/match_${match.match_id}`);
-      await chatRef.set({
-        match_id: match.match_id,
-        created_at: admin.database.ServerValue.TIMESTAMP,
-        participants: {
-          [userId]: true, // Creator is automatically added
-        },
-        messages: {},
-      });
-
-      // Update match with Firebase chat ID
-      await this.prisma.matches.update({
-        where: { match_id: match.match_id },
-        data: { firebase_chat_id: `match_${match.match_id}` },
-      });
-    } catch (error) {
-      console.error('Failed to create Firebase chat:', error);
-      // Don't fail the match creation if Firebase fails
-    }
-
-    return match;
+  if (conflict) {
+    throw new ConflictException(
+      'Stadium already booked during this time slot',
+    );
   }
+
+  // 2️⃣ CREATE match
+  const match = await this.prisma.matches.create({
+    data: {
+      creator_id: userId,
+      stadium_id: dto.stadium_id,
+      match_date: matchDate,
+      start_time: matchDate,
+      duration_minutes: dto.duration_minutes ?? 90,
+      max_players: dto.max_players,
+      status: 'pending',
+    },
+  });
+
+  // 3️⃣ Firebase (non-blocking)
+  this.initFirebaseChat(match.match_id, userId).catch((err) =>
+    console.error('Firebase init failed:', err),
+  );
+
+  return match;
+}
+private async initFirebaseChat(matchId: number, userId: number) {
+  const chatRef = admin.database().ref(`chats/match_${matchId}`);
+
+  await chatRef.set({
+    match_id: matchId,
+    created_at: admin.database.ServerValue.TIMESTAMP,
+    participants: {
+      [userId]: true,
+    },
+    messages: {},
+  });
+
+  await this.prisma.matches.update({
+    where: { match_id: matchId },
+    data: { firebase_chat_id: `match_${matchId}` },
+  });
+}
 
   async findAll(query: any) {
     return this.prisma.matches.findMany({
