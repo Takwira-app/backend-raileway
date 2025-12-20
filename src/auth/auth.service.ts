@@ -11,7 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginUserDto } from './dto/login.dto';
 import { GoogleAuthDto } from './dto/google-auth.dto';
-import { admin } from '../firebase/firebase.module'; // Use this import
+import { admin } from '../firebase/firebase.module';
 
 @Injectable()
 export class AuthService {
@@ -36,7 +36,7 @@ export class AuthService {
         name: dto.name,
         email: dto.email,
         password_hash: hashed,
-        role: dto.role,
+        role: dto.role as any, // TypeScript workaround for Prisma enum
       },
     });
 
@@ -105,13 +105,18 @@ export class AuthService {
           throw new BadRequestException('Role is required for new users');
         }
 
+        // Validate role is one of the allowed values
+        if (dto.role !== 'player' && dto.role !== 'owner') {
+          throw new BadRequestException('Invalid role. Must be "player" or "owner"');
+        }
+
         // Create new user
         user = await this.prisma.users.create({
           data: {
             name: name || email.split('@')[0],
             email,
             google_id: uid,
-            role: dto.role,
+            role: dto.role as any, // TypeScript workaround for Prisma enum
             password_hash: null, // No password for Google auth
           },
         });

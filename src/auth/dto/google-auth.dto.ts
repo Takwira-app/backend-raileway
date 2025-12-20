@@ -1,12 +1,13 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
-import { user_role } from 'generated/prisma/enums';
+// src/auth/dto/google-auth.dto.ts
+import { IsString, IsNotEmpty, IsOptional, IsIn } from 'class-validator';
 
 export class GoogleAuthDto {
   @IsString()
   @IsNotEmpty()
-  idToken: string; // Firebase ID token from client
+  idToken: string;
 
-  @IsEnum(user_role)
-  role: user_role; // Required for first-time registration
+  @IsOptional()
+  @IsString()
+  @IsIn(['player', 'owner'])
+  role?: string;
 }
-
